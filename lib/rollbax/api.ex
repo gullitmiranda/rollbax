@@ -12,9 +12,9 @@ defmodule Rollbax.Api do
 
       defstruct [:draft, :url, :enabled]
 
-      def start_link(token, envt, enabled, url \\ @api_url) do
+      def start_link(token, envt, enabled, url \\ @api_url, module_name \\ __MODULE__) do
         state = new(token, envt, url, enabled)
-        GenServer.start_link(__MODULE__, state, [name: __MODULE__])
+        GenServer.start_link(__MODULE__, state, [name: module_name])
       end
 
       def new(token, envt, url, enabled) do
@@ -32,9 +32,9 @@ defmodule Rollbax.Api do
         :ok = :hackney_pool.stop_pool(__MODULE__)
       end
 
-      def emit(lvl, msg, meta) when is_map(meta) do
+      def emit(lvl, msg, meta, module_name \\ __MODULE__) when is_map(meta) do
         event = {Atom.to_string(lvl), msg, unix_timestamp(), meta}
-        GenServer.cast(__MODULE__, {:emit, event})
+        GenServer.cast(module_name, {:emit, event})
       end
 
       def handle_cast({:emit, _event}, %{enabled: false} = state) do
