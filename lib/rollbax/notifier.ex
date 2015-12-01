@@ -30,9 +30,10 @@ defmodule Rollbax.Notifier do
   end
 
   defp post_event(level, {Logger, msg, _ts, meta}, keys) do
-    msg = IO.chardata_to_string(msg)
-    meta = take_into_map(meta, keys)
-    Rollbax.Client.emit(level, msg, meta)
+    msg         = IO.chardata_to_string(msg)
+    meta        = take_into_map(meta, keys)
+    module_name = Application.get_env(:logger, __MODULE__) |> Keyword.get(:module_name)
+    Rollbax.Client.emit(level, msg, meta, module_name)
   end
 
   defp take_into_map(metadata, keys) do

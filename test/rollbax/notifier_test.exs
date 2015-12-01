@@ -19,7 +19,7 @@ defmodule Rollbax.NotifierTest do
   end
 
   test "notify level filtering" do
-    Logger.configure_backend(Notifier, level: :warn)
+    Logger.configure_backend(Notifier, level: :warn, module_name: ExUnit.RollbaxCase)
     capture_log(fn ->
       Logger.error(["test", ?\s, "pass"])
       Logger.info("miss")
