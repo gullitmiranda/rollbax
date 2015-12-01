@@ -1,5 +1,5 @@
 defmodule Rollbax.Api do
-  defmacro __using__(opts) do
+  defmacro __using__(_opts) do
     quote do
       use GenServer
 
@@ -7,20 +7,26 @@ defmodule Rollbax.Api do
 
       alias Rollbax.Item
 
-      @api_url "https://api.rollbar.com/api/1/item/"
+      @entrypoint_url "/item"
       @headers [{"content-type", "application/json"}]
 
-      defstruct [:draft, :url, :enabled]
+      defstruct [:draft, :url, :enabled, :config]
 
-      def start_link(token, envt, enabled, url \\ @api_url, module_name \\ nil) do
+      def start_link(opts, module_name \\ nil) do
         module_name = module_name || __MODULE__
-        state = new(token, envt, url, enabled)
+        state = opts |> Rollbax.parse_config |> new
         GenServer.start_link(__MODULE__, state, [name: module_name])
       end
 
-      def new(token, envt, url, enabled) do
-        draft = Item.draft(token, envt)
-        %__MODULE__{draft: draft, url: url, enabled: enabled}
+      def new(config) do
+        draft = Item.draft(config[:access_token], config[:environment])
+        url   = (config[:origin] <> @entrypoint_url)
+        %__MODULE__{
+          draft: draft,
+          url: url,
+          enabled: config[:enabled],
+          config: config,
+        }
       end
 
       def init(state) do

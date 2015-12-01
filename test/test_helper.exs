@@ -12,7 +12,13 @@ defmodule ExUnit.RollbaxCase do
   end
 
   def start_rollbax_client(token, envt) do
-    Rollbax.Client.start_link(token, envt, true, "http://localhost:4004")
+    config = [
+      access_token: token,
+      envt: envt,
+      origin: "http://localhost:4004"
+    ]
+
+    Rollbax.Client.start_link(config, __MODULE__)
   end
 
   def capture_log(fun) do
@@ -35,7 +41,7 @@ defmodule RollbarAPI do
   end
 
   def stop() do
-    :timer.sleep(80)
+    :timer.sleep(200)
     Cowboy.shutdown(__MODULE__.HTTP)
   end
 
