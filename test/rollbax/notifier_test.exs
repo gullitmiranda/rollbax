@@ -24,7 +24,7 @@ defmodule Rollbax.NotifierTest do
       Logger.error(["test", ?\s, "pass"])
       Logger.info("miss")
     end)
-    assert_receive {:api_request, body}
+    assert_receive {:api_request, body}, 200
     assert body =~ "body\":\"test pass"
     refute_receive {:api_request, _body}
   end
