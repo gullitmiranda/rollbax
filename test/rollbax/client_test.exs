@@ -16,7 +16,7 @@ defmodule Rollbax.ClientTest do
 
   test "post payload" do
     :ok = Client.emit(:warn, "pass", %{meta: "OK"}, @module_name)
-    assert_receive {:api_request, body}, 200
+    assert_receive {:api_request, body}, 250
     assert body =~ "access_token\":\"token1"
     assert body =~ "environment\":\"test"
     assert body =~ "level\":\"warn"
@@ -30,7 +30,7 @@ defmodule Rollbax.ClientTest do
     end
 
     for _ <- 1..60 do
-      assert_receive {:api_request, _body}, 200
+      assert_receive {:api_request, _body}, 250
     end
   end
 
