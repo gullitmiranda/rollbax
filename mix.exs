@@ -3,7 +3,7 @@ defmodule Rollbax.Mixfile do
 
   def project() do
     [app: :rollbax,
-     version: "0.5.2",
+     version: "0.6.0",
      elixir: "~> 1.0",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -18,10 +18,11 @@ defmodule Rollbax.Mixfile do
   end
 
   defp deps() do
-    [{:hackney, "~> 1.1"},
+    [{:hackney, "~> 1.4.7"},
      {:poison,  "~> 1.4"},
+     {:plug,   "~> 1.0.3", optional: true},
 
-     {:plug,   "~> 0.13.0", only: :test},
+     {:plug,   "~> 1.0.3", only: :test},
      {:cowboy, "~> 1.0.0", only: :test}]
   end
 
