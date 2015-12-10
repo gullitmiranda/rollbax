@@ -20,7 +20,13 @@ defmodule Rollbax do
           enabled:      true,
           environment:  :development,
   """
+  @context :rollbax_context
 
+  @doc """
+    This is here as a callback to Application to configure and start the
+    Rollbax client's dependencies. You'll likely never need to call this
+    function yourself.
+  """
   def start(_type, _args) do
     import Supervisor.Spec
 
@@ -65,5 +71,13 @@ defmodule Rollbax do
     message = Exception.format(:error, exception, stacktrace)
     meta = Map.put(meta, :rollbax_occurr_data, occurr_data)
     Rollbax.Client.emit(:error, message, meta, module_name)
+  end
+
+  def context do
+    (Process.get(@context) || %{}) |> Enum.into(Map.new)
+  end
+
+  def context(dict) do
+    Process.put(@context, Dict.merge(context, dict))
   end
 end
