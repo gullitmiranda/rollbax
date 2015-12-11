@@ -61,3 +61,18 @@ defmodule RollbarAPI do
     send_resp(conn, 404, "Not Found")
   end
 end
+
+defmodule ExUnit.PlugApp do
+  import Plug.Conn
+  use Plug.Router
+  use Rollbax.Plug
+
+  plug :match
+  plug :dispatch
+
+  get "/bang" do
+    _ = conn
+    raise RuntimeError, "Oops"
+  end
+end
+

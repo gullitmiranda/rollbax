@@ -19,6 +19,34 @@ defmodule Rollbax do
           project_root: System.cwd,
           enabled:      true,
           environment:  :development,
+
+  ### Using the Plug
+  If you're using Phoenix, or any Plug-based Elixir web framework, you can
+  `use` the Rollbax.Plug module in your Router and all exceptions in web
+  requests will automatically be reported to Rollbax.
+
+      defmodule MoneyPrinter.Router do
+        use MoneyPrinter.Web, :router
+        use Rollbax.Plug
+      end
+
+  You can also automatically set useful context on every request by defining
+  a Plug compatible function:
+
+      defmodule MoneyPrinter.Router do
+        use MoneyPrinter.Web, :router
+        use Rollbax.Plug
+
+        plug :set_rollbax_context
+
+        # your routes
+
+        defp set_rollbax_context(conn, _opts) do
+          user = get_user(conn)
+          Rollbax.context(user_id: user.id, account: user.account)
+          conn
+        end
+      end
   """
   @context :rollbax_context
 
