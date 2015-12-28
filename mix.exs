@@ -9,7 +9,7 @@ defmodule Rollbax.Mixfile do
      start_permanent: Mix.env == :prod,
      description: description(),
      package: package(),
-     deps: deps()]
+     deps: deps(Mix.env)]
   end
 
   def application() do
@@ -17,13 +17,11 @@ defmodule Rollbax.Mixfile do
      mod: {Rollbax, []}]
   end
 
-  defp deps() do
+  defp deps(env) do
     [{:hackney, "~> 1.4.7"},
      {:poison,  "~> 1.4"},
-     {:plug,   "~> 1.0.3", optional: true},
-
-     {:plug,   "~> 1.0.3", only: :test},
-     {:cowboy, "~> 1.0.0", only: :test}]
+     {:plug,    "~> 1.0.3", optional: (env !== :test)},
+     {:cowboy,  "~> 1.0.4", optional: (env !== :test)}]
   end
 
   defp description() do
