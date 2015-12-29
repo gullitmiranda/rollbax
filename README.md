@@ -70,6 +70,18 @@ can be disabled or turned into logging:
 config :rollbax, enabled: :log
 ```
 
+### Tests (with [azk](http://azk.io)):
+
+Requirements:
+
+  - Install [azk](http://docs.azk.io/en/installation/)
+
+Run tests:
+
+```shell
+$ azk shell -- mix test
+```
+
 ## License
 
 This software is licensed under [the ISC license](LICENSE).
