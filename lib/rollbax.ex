@@ -27,7 +27,7 @@ defmodule Rollbax do
 
       defmodule MoneyPrinter.Router do
         use MoneyPrinter.Web, :router
-        use Rollbax.Plug
+        use Rollbax.Plug, otp_app: :rollbax_test
       end
 
   You can also automatically set useful context on every request by defining
@@ -35,7 +35,7 @@ defmodule Rollbax do
 
       defmodule MoneyPrinter.Router do
         use MoneyPrinter.Web, :router
-        use Rollbax.Plug
+        use Rollbax.Plug, otp_app: :rollbax_test
 
         plug :set_rollbax_context
 
