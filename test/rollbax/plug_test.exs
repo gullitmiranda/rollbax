@@ -1,8 +1,18 @@
 defmodule Rollbax.PlugTest do
-  use ExUnit.Case, async: true
+  use ExUnit.RollbaxCase
   use Plug.Test
 
   alias ExUnit.PlugApp
+
+  setup_all do
+    {:ok, _} = start_rollbax_client("token1", "test")
+    :ok
+  end
+
+  setup do
+    {:ok, _} = RollbarAPI.start(self())
+    on_exit(fn -> RollbarAPI.stop() end)
+  end
 
   test "exceptions on a non-existant route are ignored" do
     exception = %FunctionClauseError{arity: 4,
@@ -60,4 +70,39 @@ defmodule Rollbax.PlugTest do
 
     assert rack_format == Rollbax.Plug.header_to_rack_format(header, %{})
   end
+
+  test "runtime exception in plug get request" do
+    exception = %RuntimeError{message: "Oops"}
+
+    conn = conn(:get, "/bang?foo=bar")
+    assert exception == catch_error(PlugApp.call conn, [])
+    assert_receive {:api_request, body}, 500
+    assert body =~ "access_token\":\"token1"
+    assert body =~ "environment\":\"test"
+    assert body =~ "level\":\"error"
+    assert body =~ "REQUEST_METHOD\":\"GET"
+    assert body =~ "QUERY_STRING\":\"foo=bar"
+    assert body =~ "PATH_INFO\":\"bang"
+    assert body =~ "ORIGINAL_FULLPATH\":\"/bang"
+    assert body =~ "params\":{\"foo\":\"bar\"}"
+    assert body =~ "body\":{\"message\":{\"body\":\"** (RuntimeError) Oops"
+  end
+
+  test "runtime exception in plug post request" do
+    exception = %RuntimeError{message: "Whats?"}
+
+    conn = conn(:post, "/push", [foo: :bar])
+    assert exception == catch_error(PlugApp.call conn, [])
+    assert_receive {:api_request, body}, 500
+    assert body =~ "access_token\":\"token1"
+    assert body =~ "environment\":\"test"
+    assert body =~ "level\":\"error"
+    assert body =~ "REQUEST_METHOD\":\"POST"
+    assert body =~ "QUERY_STRING\":\"\""
+    assert body =~ "PATH_INFO\":\"push"
+    assert body =~ "ORIGINAL_FULLPATH\":\"/push"
+    assert body =~ "params\":{\"foo\":\"bar\"}"
+    assert body =~ "body\":{\"message\":{\"body\":\"** (RuntimeError) Whats?"
+  end
+
 end

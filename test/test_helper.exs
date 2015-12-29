@@ -79,5 +79,9 @@ defmodule ExUnit.PlugApp do
     _ = conn
     raise RuntimeError, "Oops"
   end
-end
 
+  post "/push" do
+    _ = conn
+    raise RuntimeError, "Whats?"
+  end
+end
