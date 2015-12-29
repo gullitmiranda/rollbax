@@ -35,9 +35,11 @@ defmodule Rollbax.Plug do
     conn = try do
       Plug.Conn.fetch_session(conn)
       session = conn.session
+      _ = session
     rescue
       e in [ArgumentError, KeyError] ->
         # just return conn and move on
+        _ = e
         conn
     end
 
