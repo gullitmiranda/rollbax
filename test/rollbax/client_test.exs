@@ -1,8 +1,8 @@
 defmodule Rollbax.ClientTest do
   use ExUnit.RollbaxCase
 
-  alias Rollbax.Client
-  @module_name ExUnit.RollbaxCase
+  alias RollbaxTest.Client
+  @opt_app :rollbax_test
 
   setup_all do
     {:ok, _} = start_rollbax_client("token1", "test")
@@ -15,7 +15,7 @@ defmodule Rollbax.ClientTest do
   end
 
   test "post payload" do
-    :ok = Client.emit(:warn, "pass", %{meta: "OK"}, @module_name)
+    :ok = Client.emit(:warn, "pass", %{meta: "OK"})
     assert_receive {:api_request, body}, 250
     assert body =~ "access_token\":\"token1"
     assert body =~ "environment\":\"test"
@@ -26,7 +26,7 @@ defmodule Rollbax.ClientTest do
 
   test "mass sending" do
     for _ <- 1..60 do
-      :ok = Client.emit(:error, "pass", %{}, @module_name)
+      :ok = Client.emit(:error, "pass", %{})
     end
 
     for _ <- 1..60 do
@@ -37,7 +37,7 @@ defmodule Rollbax.ClientTest do
   test "endpoint is down" do
     :ok = RollbarAPI.stop()
     log = capture_log(fn ->
-      :ok = Client.emit(:error, "miss", %{}, @module_name)
+      :ok = Client.emit(:error, "miss", %{})
     end)
     assert log =~ "[error] (Rollbax) connection error:"
     refute_receive {:api_request, _body}

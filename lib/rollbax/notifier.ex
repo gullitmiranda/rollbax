@@ -30,10 +30,10 @@ defmodule Rollbax.Notifier do
   end
 
   defp post_event(level, {Logger, msg, _ts, meta}, keys) do
-    msg         = IO.chardata_to_string(msg)
-    meta        = take_into_map(meta, keys)
-    module_name = Application.get_env(:logger, __MODULE__) |> Keyword.get(:module_name)
-    Rollbax.Client.emit(level, msg, meta, module_name)
+    msg     = IO.chardata_to_string(msg)
+    meta    = take_into_map(meta, keys)
+    options = Application.get_env(:logger, __MODULE__)
+    Rollbax.Client.emit(level, msg, meta, options)
   end
 
   defp take_into_map(metadata, keys) do
@@ -43,12 +43,12 @@ defmodule Rollbax.Notifier do
   end
 
   defp configure(opts) do
-    config =
+    options =
       Application.get_env(:logger, __MODULE__, [])
       |> Keyword.merge(opts)
-    Application.put_env(:logger, __MODULE__, config)
+    Application.put_env(:logger, __MODULE__, options)
 
-    %{level: Keyword.get(config, :level, :error),
-      metadata: Keyword.get(config, :metadata, [])}
+    %{level: Keyword.get(options, :level, :error),
+      metadata: Keyword.get(options, :metadata, [])}
   end
 end

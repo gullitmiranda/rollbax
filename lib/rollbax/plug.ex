@@ -1,15 +1,16 @@
 if Code.ensure_loaded?(Plug) do
 
 defmodule Rollbax.Plug do
-  defmacro __using__(_env) do
+  defmacro __using__(opts) do
     quote do
       import Rollbax.Plug
       use Plug.ErrorHandler
       require Rollbax
 
+      @opts unquote(opts)
+
       # Exceptions raised on non-existant Plug routes are ignored
       defp handle_errors(conn, %{reason: %FunctionClauseError{function: :do_match}} = ex) do
-        IO.inspect [mod: __MODULE__]
         nil
       end
 
@@ -23,13 +24,8 @@ defmodule Rollbax.Plug do
       defp handle_errors(conn, %{kind: _kind, reason: exception, stack: stack}) do
         metadata = %{plug_env: build_plug_env(conn, __MODULE__),
                      rollbax_context: Rollbax.context()}
-        # IO.inspect [
-        #   metadata: metadata,
-        #   reason: exception,
-        #   stack: stack
-        # ]
 
-        Rollbax.report(exception, stack, metadata, %{})
+        Rollbax.report(exception, stack, metadata, %{}, @opts)
       end
     end
   end

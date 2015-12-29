@@ -94,11 +94,11 @@ defmodule Rollbax do
     ]
   end
 
-  def report(exception, stacktrace, meta \\ %{} , occurr_data \\ %{}, module_name \\ Rollbax.Client)
+  def report(exception, stacktrace, meta \\ %{} , occurr_data \\ %{}, opts \\ [])
   when is_list(stacktrace) and is_map(meta) and is_map(occurr_data) do
     message = Exception.format(:error, exception, stacktrace)
     meta = Map.put(meta, :rollbax_occurr_data, occurr_data)
-    Rollbax.Client.emit(:error, message, meta, module_name)
+    Rollbax.Client.emit(:error, message, meta, opts)
   end
 
   def context do

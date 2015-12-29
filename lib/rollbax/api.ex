@@ -1,5 +1,5 @@
 defmodule Rollbax.Api do
-  defmacro __using__(_opts) do
+  defmacro __using__(opts) do
     quote do
       use GenServer
 
@@ -9,13 +9,16 @@ defmodule Rollbax.Api do
 
       @entrypoint_url "/item"
       @headers [{"content-type", "application/json"}]
+      @client_opts unquote(opts)
 
       defstruct [:draft, :url, :enabled, :config]
 
-      def start_link(opts, module_name \\ nil) do
-        module_name = module_name || __MODULE__
-        state = opts |> Rollbax.parse_config |> new
-        GenServer.start_link(__MODULE__, state, [name: module_name])
+      def start_link(opts) do
+        opts = @client_opts ++ opts
+        |> Rollbax.parse_config
+
+        state = opts |> new
+        GenServer.start_link(__MODULE__, state, [name: opts[:otp_app]])
       end
 
       def new(config) do
@@ -39,10 +42,11 @@ defmodule Rollbax.Api do
         :ok = :hackney_pool.stop_pool(__MODULE__)
       end
 
-      def emit(lvl, msg, meta, module_name \\ nil) when is_map(meta) do
-        module_name = module_name || __MODULE__
+      def emit(lvl, msg, meta, opts \\ []) when is_map(meta) do
+        opts = @client_opts ++ opts
+        |> Rollbax.parse_config
         event = {Atom.to_string(lvl), msg, unix_timestamp(), meta}
-        GenServer.cast(module_name, {:emit, event})
+        GenServer.cast(opts[:otp_app], {:emit, event})
       end
 
       def handle_cast({:emit, _event}, %{enabled: false} = state) do
@@ -61,7 +65,7 @@ defmodule Rollbax.Api do
 
       def handle_cast({:emit, event}, %{enabled: true} = state) do
         payload = compose_json(state.draft, event)
-        opts = [:async, pool: __MODULE__]
+        opts = [:async, pool: state.config[:otp_app]]
         case :hackney.post(state.url, @headers, payload, opts) do
           {:ok, _ref} -> :ok
           {:error, reason} ->

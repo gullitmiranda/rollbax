@@ -15,10 +15,11 @@ defmodule ExUnit.RollbaxCase do
     config = [
       access_token: token,
       environment: envt,
-      origin: "http://localhost:4004"
+      origin: "http://localhost:4004",
+      otp_app: :rollbax_test,
     ]
 
-    Rollbax.Client.start_link(config, __MODULE__)
+    RollbaxTest.Client.start_link(config)
   end
 
   def capture_log(fun) do
@@ -28,6 +29,10 @@ defmodule ExUnit.RollbaxCase do
       Logger.flush()
     end)
   end
+end
+
+defmodule RollbaxTest.Client do
+  use Rollbax.Api, [otp_app: :rollbax_test]
 end
 
 defmodule RollbarAPI do
@@ -65,7 +70,7 @@ end
 defmodule ExUnit.PlugApp do
   import Plug.Conn
   use Plug.Router
-  use Rollbax.Plug
+  use Rollbax.Plug, otp_app: :rollbax_test
 
   plug :match
   plug :dispatch

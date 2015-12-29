@@ -8,6 +8,7 @@ defmodule Rollbax.NotifierTest do
   setup_all do
     {:ok, _} = start_rollbax_client("token1", "test")
     {:ok, _} = Logger.add_backend(Notifier, flush: true)
+    :ok = Logger.configure_backend(Notifier, otp_app: :rollbax_test)
     on_exit(fn ->
       Logger.remove_backend(Notifier, flush: true)
     end)
@@ -19,7 +20,7 @@ defmodule Rollbax.NotifierTest do
   end
 
   test "notify level filtering" do
-    Logger.configure_backend(Notifier, level: :warn, module_name: ExUnit.RollbaxCase)
+    Logger.configure_backend(Notifier, level: :warn)
     capture_log(fn ->
       Logger.error(["test", ?\s, "pass"])
       Logger.info("miss")
